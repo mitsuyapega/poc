@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import type { FormEvent } from 'react';
 import './App.css'
 import {Button, Flex, Form, Input} from "@pega/cosmos-react-core";
@@ -13,9 +12,8 @@ const StyledLogin = styled.div`
 `;
 
 const Login = ()=>{ 
-  const [count, setCount] = useState(0)
   const navigate = useNavigate();
-  const handleForm = (e) => {
+  const handleForm = () => {
     navigate('/Board');
   }
 
@@ -27,7 +25,7 @@ const Login = ()=>{
         <Form
           actions={
             <>
-              <Button name='Submit' type='submit' variant='primary' onClick={(e) => {handleForm(e)}}>
+              <Button name='Submit' type='submit' variant='primary' onClick={() => {handleForm()}}>
                 Log in
               </Button>
             </>

@@ -2,15 +2,11 @@ import { useRef } from 'react';
 import styled, {createGlobalStyle} from 'styled-components';
 import {Card, CardContent, Flex, useConsolidatedRef, useDraggable} from "@pega/cosmos-react-core";
 import {StyledList, StyledSublistItem} from "@pega/cosmos-react-core/lib/components/List/List";
-import {elements} from "@pega/cosmos-react-core/lib/components/FormField/FormField.test-ids";
-import {StyledListItem} from "@pega/cosmos-react-core/lib/components/FieldGroup/FieldGroupList";
 
 
 const GlobalStyle = createGlobalStyle`
   body {
-    margin: 0;
-    box-sizing: border-box;
-    padding: 0;
+    overflow: hidden;
   }
 `;
 
@@ -28,19 +24,8 @@ const StyledTaskList = styled(StyledSublistItem)`
 `
 
 const StyledCard = styled.div`
-    border: 1px solid gray;
+  border: 1px solid gray;
 `
-
-const StyledTaskContainer = styled.div`
-  .tile {
-    width: 100%;
-    height: 100px;
-    display: inline-block;
-    border: 1px double;
-    margin: 10px;
-    list-style: none;
-  }
-`;
 
 interface item {
   id: number;

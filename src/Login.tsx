@@ -1,7 +1,7 @@
 import type { FormEvent } from 'react';
-import {Button, Card, CardContent, Flex, Form, Input} from "@pega/cosmos-react-core";
+import {Button, Card, CardContent, defaultThemeProp, Flex, Form, Input} from "@pega/cosmos-react-core";
 import { useNavigate } from "react-router-dom";
-import styled, {createGlobalStyle} from "styled-components";
+import styled, {createGlobalStyle, css} from "styled-components";
 import clickUpLogo from './assets/clickup logo.svg'
 
 const GlobalStyle = createGlobalStyle`
@@ -10,11 +10,19 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-const StyledPage = styled.div`
+const StyledPage = styled.div(props => {
+  const {
+    'extra-light': extraLight
+  } = props.theme.base.colors.gray;
+
+  return css`
   height: 100%;
   width: 100%;
-  background-color: #F8F8FF;
-`;
+  background-color: ${extraLight};
+  `
+})
+
+StyledPage.defaultProps = defaultThemeProp;
 
 const StyledHeader = styled.header`
   display: flex;
@@ -31,11 +39,25 @@ const StyledSpan = styled.span`
   margin-right: 10px;
 `;
 
-const StyledButton = styled.button`
-  padding: 8px 16px;
-  background-color: mediumpurple;
-  color: white;
-`;
+const StyledButton = styled.button(props => {
+  const {
+    spacing,
+    'colors': {
+      'purple': {
+        'dark': colorDark,
+      },
+      white,
+    }
+  } = props.theme.base;
+
+  return css`
+    padding: ${spacing} 16px;
+    background-color: ${colorDark};
+    color: ${white};
+  `
+})
+
+StyledButton.defaultProps = defaultThemeProp;
 
 const StyledForm = styled.div`
   height: 60%;
@@ -46,7 +68,7 @@ const StyledCard = styled.div`
   width: 30%;
   margin: auto;
   padding: 10px;
-  box-shadow: 1px 1px gray;
+  box-shadow: 1px 1px ${(props) => props.theme.base.colors.gray.dark};
 `;
 
 const StyledWelcome = styled.span`
@@ -97,7 +119,7 @@ const StyledDivide = styled.span`
 
 const StyledLogin = styled.button`
   width: 100%;
-  background-color: slateblue;
+  background-color: ${defaultThemeProp.theme.base.colors.purple.medium};
   border-radius: 5px;
   margin-top: 20px;
   margin-bottom: 20px;

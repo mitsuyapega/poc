@@ -1,7 +1,35 @@
 import { useRef } from 'react';
-import styled from 'styled-components';
-import {Flex, useConsolidatedRef, useDraggable} from "@pega/cosmos-react-core";
+import styled, {createGlobalStyle} from 'styled-components';
+import {Card, CardContent, Flex, useConsolidatedRef, useDraggable} from "@pega/cosmos-react-core";
+import {StyledList, StyledSublistItem} from "@pega/cosmos-react-core/lib/components/List/List";
+import {elements} from "@pega/cosmos-react-core/lib/components/FormField/FormField.test-ids";
+import {StyledListItem} from "@pega/cosmos-react-core/lib/components/FieldGroup/FieldGroupList";
 
+
+const GlobalStyle = createGlobalStyle`
+  body {
+    margin: 0;
+    box-sizing: border-box;
+    padding: 0;
+  }
+`;
+
+const StyledPage = styled.div`
+  height: 90%;
+  width: 90%;
+`;
+
+const StyledTask = styled(StyledList)`
+  border: 2px solid black;
+`
+
+const StyledTaskList = styled(StyledSublistItem)`
+  border: 1px solid blue;
+`
+
+const StyledCard = styled.div`
+    border: 1px solid gray;
+`
 
 const StyledTaskContainer = styled.div`
   .tile {
@@ -41,25 +69,61 @@ const Board = () => {
   const dragRef3 = useRef<HTMLDivElement>(null);
   useDraggable(containerRef3, dragRef3, true)
 
+  const tasklist = [
+    {name: "Open", subtitle: ""},
+    {name: "Todo", subtitle: ""},
+    {name: "In Progress", subtitle: ""},
+    {name: "Review", subtitle: ""},
+    {name: "Complete", subtitle: ""},
+    {name: "Close", subtitle: ""},
+  ]
+  const data = [
+    {title: "Fill the board", assignedTo: "PersonA", status: "Todo"},
+    {title: "Implement", assignedTo: "PersonB", status: "Open"},
+    {title: "Issue", assignedTo: "PersonB", status: "Open"},
+    {title: "Reply to devops mail", assignedTo: "PersonB", status: "Open"},
+    {title: "Send email to contribute for tables", assignedTo: "PersonC", status: "In Progress"},
+    {title: "Error section", assignedTo: "PersonC", status: "In Progress"},
+    {title: "Report tile issue", assignedTo: "PersonC", status: "Complete"},
+    {title: "Weeding", assignedTo: "PersonD", status: "Complete"},
+    {title: "Check cows behavior", assignedTo: "PersonD", status: "Close"},
+  ]
   return (
     <>
-      <Flex container direction="column">
-        <h1>Board</h1>
-        <ul>
-          <StyledTaskContainer ref={tileContainerRef} className='container1'>
-            {/*{items.map(item => {*/}
-            {/*return (*/}
-            {/*  <>*/}
-                <li className='tile' ref={containerRef1}><p ref={dragRef1}>tile1</p></li>
-                <li className='tile' ref={containerRef2}><p ref={dragRef2}>tile2</p></li>
-                <li className='tile' ref={containerRef3}><p ref={dragRef3}>tile3</p></li>
-                {/*<li className='tile' ref={`containerRef${item.id}`} ><p ref={`dragRef${item.id}`}>{item.name}</p></li>*/}
-              {/*</>*/}
-            {/*);*/}
-            {/*})}*/}
-          </StyledTaskContainer>
-        </ul>
+      <GlobalStyle />
+      <StyledPage>
+
+      <h1>Board</h1>
+      <Flex as={StyledTask} container={{ direction: 'row' }}>
+        {tasklist.map(task => {
+          return (
+            <>
+              <Flex as={StyledTaskList} container={{ direction: 'column' }}>
+                <span>{task.name}</span>
+                {data.map(element => {
+                  if (task.name == element.status) {
+                    return (
+                      <Card as={StyledCard}>
+                        <CardContent>
+                          {task.name == element.status &&
+                              <>
+                                <span>{element.title}</span>
+                                <span>{element.assignedTo}</span>
+                              </>
+                          }
+                        </CardContent>
+                      </Card>
+                    );
+                  }
+                })
+                }
+              </Flex>
+            </>
+            );
+          })
+        }
       </Flex>
+      </StyledPage>
     </>
   );
 };

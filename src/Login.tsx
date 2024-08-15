@@ -8,7 +8,7 @@ const GlobalStyle = createGlobalStyle`
   body {
     margin: 0;
   }
-`
+`;
 
 const StyledPage = styled.div`
   height: 100%;

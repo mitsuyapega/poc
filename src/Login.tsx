@@ -75,32 +75,39 @@ const StyledWelcome = styled.span`
   font-size: 25px;
   font-weight: bold;
   text-align: center;
-  font-family: Helvetica;
+  font-family: ${defaultThemeProp.theme.base["font-family"]};
   margin-bottom: 10px;
 `;
 
 const StyledGIcon = styled.img`
   width: 10%;
   height: 20px;
-  margin-right: 40px;
 `;
 
 const StyledGButton = styled.button`
-  justify-content: flex-start;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+`;
+
+const StyledTextContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  flex-grow: 1;
 `;
 
 const StyledDivide = styled.span`
   display: flex;
   align-items: center;
-  width: 300px;
   margin: 20px 0;
 
   &::before,
   &::after {
     content: '';
     flex: 1;
-    height: 1px;
-    background-color: gray;
+    border-top: 1px solid ${defaultThemeProp.theme.base.colors.gray.medium};
   };
   
   &::before {
@@ -114,6 +121,8 @@ const StyledDivide = styled.span`
   span {
     font-size: 14px;
     color: black;
+    width: 30px;
+    text-align: center;
   };
 `;
 
@@ -166,7 +175,7 @@ const Login: React.FC = () => {
                 <StyledGIcon
                   src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
                 />
-                Continue with Google
+                <StyledTextContainer>Continue with Google</StyledTextContainer>
               </Button>
               <Form onSubmit={(e: FormEvent) => {e.preventDefault();}}>
                 <StyledDivide>

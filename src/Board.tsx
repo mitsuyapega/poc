@@ -1,13 +1,13 @@
-import { useRef } from 'react';
-import styled, {createGlobalStyle, css} from 'styled-components';
-import {Card, defaultThemeProp, Flex, useConsolidatedRef} from "@pega/cosmos-react-core";
+import { useState } from 'react';
+import styled, { createGlobalStyle, css } from 'styled-components';
+import { Button, Card, defaultThemeProp, Flex, Input } from "@pega/cosmos-react-core";
 import { StyledList, StyledSublistItem } from "@pega/cosmos-react-core/lib/components/List/List";
-import ForwardedCardContent from './ForwardedCardContent';
-import useDraggableWrapper from './useDraggableWrapper';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from './store';
+import { addTask, updateTask, deleteTask } from './tasksSlice';
 
 const GlobalStyle = createGlobalStyle`
   body {
-    overflow: hidden;
     font-family: ${defaultThemeProp.theme.base["font-family"]};
   }
 `;
@@ -16,8 +16,8 @@ const StyledPage = styled.div`
   padding: 20px;
   width: 90%;
 `;
+
 const StyledTask = styled(StyledList)`
-  border: 2px solid ${defaultThemeProp.theme.base.colors.black};
 `;
 
 const StyledTaskList = styled(StyledSublistItem)(() => {
@@ -100,56 +100,131 @@ const StatusTag = styled.span`
     font-size: 12px;
 `;
 
-const Board = () => {
-  const taskList = [
-    { name: "Open", subtitle: "" },
-    { name: "Todo", subtitle: "" },
-    { name: "In Progress", subtitle: "" },
-    { name: "Review", subtitle: "" },
-    { name: "Complete", subtitle: "" },
-    { name: "Close", subtitle: "" },
-  ];
+const DropdownItem = styled.div`
+  padding: 8px 16px;
+  cursor: pointer;
+  &:hover {
+    background-color: ${defaultThemeProp.theme.base.colors.gray.light};
+  }
+`;
 
-  const data = [
-    { title: "Fill the board", assignedTo: "PersonA", status: "Todo" },
-    { title: "Implement", assignedTo: "PersonB", status: "Open" },
-    { title: "Issue", assignedTo: "PersonB", status: "Open" },
-    { title: "Reply to devops mail", assignedTo: "PersonB", status: "Open" },
-    { title: "Send email to contribute for tables", assignedTo: "PersonC", status: "In Progress" },
-    { title: "Error section", assignedTo: "PersonC", status: "In Progress" },
-    { title: "Report tile issue", assignedTo: "PersonC", status: "Complete" },
-    { title: "Weeding", assignedTo: "PersonD", status: "Complete" },
-    { title: "Check cows behavior", assignedTo: "PersonD", status: "Close" },
-  ];
+const VerticalEllipsisButton = styled(Button)`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  
+  span {
+    width: 4px;
+    height: 4px;
+    background-color: ${defaultThemeProp.theme.base.colors.black};
+    border-radius: 50%;
+    margin: 2px 0;
+  }
+`;
+
+const Board = () => {
+  const dispatch = useDispatch();
+  const statuses = useSelector((state: RootState) => state.tasks.statuses);
+  const tasks = useSelector((state: RootState) => state.tasks.tasks);
+  const [movingTask, setMovingTask] = useState(null);
+  const [editingTask, setEditingTask] = useState(null);
+  const [newStatus, setNewStatus] = useState('');
+  const [newTitle, setNewTitle] = useState('');
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+
+  const handleMoveTask = (task) => {
+    setMovingTask(task);
+    setNewStatus(task.status);
+  };
+
+  const handleUpdateTask = (task) => {
+    setEditingTask(task);
+    setNewTitle(task.title);
+  };
+
+  const handleSaveTask = () => {
+    if (movingTask) {
+      const updatedTask = { ...movingTask, status: newStatus};
+      dispatch(updateTask(updatedTask));
+      setMovingTask(null);
+      setNewStatus('');
+    }
+    if (editingTask) {
+      const updatedTask = { ...editingTask, title: newTitle };
+      dispatch(updateTask(updatedTask));
+      setEditingTask(null);
+      setNewTitle('');
+    }
+  };
+
+  const handleDeleteTask = (taskId) => {
+    dispatch(deleteTask(taskId));
+  };
+
+  const handleDropdownClick = (task) => {
+    setSelectedTask(task);
+    setDropdownVisible(!dropdownVisible);
+  };
+
+  const handleDropdownSelect = (action) => {
+    if (action === 'move') {
+      handleMoveTask(selectedTask);
+    } else if (action === 'update') {
+      handleUpdateTask(selectedTask);
+    } else if (action === 'delete') {
+      handleDeleteTask(selectedTask.id);
+    }
+    setDropdownVisible(false);
+  };
 
   return (
     <>
       <GlobalStyle />
       <StyledPage>
+        {movingTask && (
+          <div>
+            <Input type="text" value={newStatus} onChange={(e) => setNewStatus(e.target.value)} />
+            <Button onClick={handleSaveTask}>Save</Button>
+          </div>
+        )}
+        {editingTask && (
+          <div>
+            <Input type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />
+            <Button onClick={handleSaveTask}>Save</Button>
+          </div>
+        )}
         <Flex as={StyledTask} container={{ direction: 'row' }}>
-          {taskList.map((task, taskIndex) => (
-            <Flex as={StyledTaskList} container={{ direction: 'column' }} key={taskIndex}>
-              <StyledTaskName status={task.name}>{task.name}</StyledTaskName>
-              {data.filter(element => task.name === element.status).map((element, index) => {
-                const cardContentRef = useRef<HTMLDivElement>();
-                const cardContentContainerRef = useConsolidatedRef(cardContentRef);
-                const cardContentDragRef = useRef<HTMLDivElement>();
-                useDraggableWrapper(cardContentContainerRef, cardContentDragRef, true);
-
+          {statuses.map((status, statusIndex) => (
+            <Flex as={StyledTaskList} container={{ direction: 'column' }} key={statusIndex}>
+              <StyledTaskName status={status.title}>{status.title}</StyledTaskName>
+              {tasks.filter(task => status.title === task.status).map((task, index) => {
                 return (
-                  <Card as={StyledCard} key={`${taskIndex}-${index}`}>
-                    <ForwardedCardContent ref={cardContentContainerRef}>
-                      <div ref={cardContentDragRef}>
-                        <TaskTitle>{element.title}</TaskTitle>
-                        <TaskDetails>
-                          <StatusTag>{element.status}</StatusTag>
-                        </TaskDetails>
-                        <TaskDetails>
-                          <span>{element.assignedTo}</span>
-                        </TaskDetails>
-                      </div>
-                    </ForwardedCardContent>
-                  </Card>
+                    <Card as={StyledCard} key={`${statusIndex}-${index}`}>
+                      <TaskTitle>{task.title}</TaskTitle>
+                      <TaskDetails>
+                        <span>{task.assignedTo}</span>
+                        <StatusTag>{task.status}</StatusTag>
+                        <VerticalEllipsisButton onClick={() => handleDropdownClick(task)}>
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                        </VerticalEllipsisButton>
+                        {dropdownVisible && selectedTask === task && (
+                          <div>
+                            <DropdownItem onClick={() => handleDropdownSelect('move')}>Move</DropdownItem>
+                            <DropdownItem onClick={() => handleDropdownSelect('update')}>Update</DropdownItem>
+                            <DropdownItem onClick={() => handleDropdownSelect('delete')}>Delete</DropdownItem>
+                          </div>
+                        )}
+                      </TaskDetails>
+                    </Card>
                 );
               })}
             </Flex>

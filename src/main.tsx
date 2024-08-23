@@ -1,9 +1,10 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import Login from './Login.tsx'
-// import './index.css'
-import { BrowserRouter, useRoutes } from "react-router-dom";
-import Board from "./Board.tsx";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter, useRoutes } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import store from './store';
+import Login from './Login';
+import Board from './Board';
 
 function AppRoutes() {
   const element = useRoutes([
@@ -22,8 +23,10 @@ function AppRoutes() {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
+    <Provider store={store}>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </Provider>
   </React.StrictMode>,
-)
+);

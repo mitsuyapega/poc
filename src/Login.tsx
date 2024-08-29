@@ -1,8 +1,16 @@
-import type { FormEvent } from 'react';
-import {Button, Card, CardContent, defaultThemeProp, Flex, Form, Input} from "@pega/cosmos-react-core";
+import type { FormEvent } from "react";
+import {
+  Button,
+  Card,
+  CardContent,
+  defaultThemeProp,
+  Flex,
+  Form,
+  Input,
+} from "@pega/cosmos-react-core";
 import { useNavigate } from "react-router-dom";
-import styled, {createGlobalStyle, css} from "styled-components";
-import clickUpLogo from './assets/clickup logo.svg'
+import styled, { createGlobalStyle, css } from "styled-components";
+import clickUpLogo from "./assets/clickup logo.svg";
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -10,17 +18,15 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-const StyledPage = styled.div(props => {
-  const {
-    'extra-light': extraLight
-  } = props.theme.base.colors.gray;
+const StyledPage = styled.div((props) => {
+  const { "extra-light": extraLight } = props.theme.base.colors.gray;
 
   return css`
-  height: 100%;
-  width: 100%;
-  background-color: ${extraLight};
-  `
-})
+    height: 100%;
+    width: 100%;
+    background-color: ${extraLight};
+  `;
+});
 
 StyledPage.defaultProps = defaultThemeProp;
 
@@ -39,23 +45,21 @@ const StyledSpan = styled.span`
   margin-right: 10px;
 `;
 
-const StyledButton = styled.button(props => {
+const StyledButton = styled.button((props) => {
   const {
     spacing,
-    'colors': {
-      'purple': {
-        'dark': colorDark,
-      },
+    colors: {
+      purple: { dark: colorDark },
       white,
-    }
+    },
   } = props.theme.base;
 
   return css`
     padding: ${spacing} 16px;
     background-color: ${colorDark};
     color: ${white};
-  `
-})
+  `;
+});
 
 StyledButton.defaultProps = defaultThemeProp;
 
@@ -105,25 +109,25 @@ const StyledDivide = styled.span`
 
   &::before,
   &::after {
-    content: '';
+    content: "";
     flex: 1;
     border-top: 1px solid ${defaultThemeProp.theme.base.colors.gray.medium};
-  };
-  
+  }
+
   &::before {
     margin-right: 10px;
-  };
-  
+  }
+
   &::after {
     margin-left: 10px;
-  };
-  
+  }
+
   span {
     font-size: 14px;
     color: black;
     width: 30px;
     text-align: center;
-  };
+  }
 `;
 
 const StyledLogin = styled.button`
@@ -137,7 +141,7 @@ const StyledLogin = styled.button`
 const StyledInput = styled.input`
   margin-top: 20px;
   margin-bottom: 20px;
-`
+`;
 
 const StyledSSO = styled.span`
   text-align: center;
@@ -147,8 +151,8 @@ const StyledSSO = styled.span`
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const handleForm = () => {
-    navigate('/Board');
-  }
+    navigate("/Board");
+  };
 
   return (
     <>
@@ -156,7 +160,11 @@ const Login: React.FC = () => {
       <StyledPage>
         <StyledHeader>
           <a href="https://clickup.com/" target="_blank">
-            <StyledClickUp src={clickUpLogo} className="logo" alt="Clickup logo"/>
+            <StyledClickUp
+              src={clickUpLogo}
+              className="logo"
+              alt="Clickup logo"
+            />
           </a>
           <div>
             <StyledSpan>Don't have an account?</StyledSpan>
@@ -165,30 +173,34 @@ const Login: React.FC = () => {
         </StyledHeader>
 
         <Flex
-          container={{justify: 'center', alignItems: 'center'}}
+          container={{ justify: "center", alignItems: "center" }}
           as={StyledForm}
         >
           <Card as={StyledCard}>
             <CardContent>
               <StyledWelcome>Welcome back!</StyledWelcome>
               <Button as={StyledGButton}>
-                <StyledGIcon
-                  src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
-                />
+                <StyledGIcon src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" />
                 <StyledTextContainer>Continue with Google</StyledTextContainer>
               </Button>
-              <Form onSubmit={(e: FormEvent) => {e.preventDefault();}}>
+              <Form
+                onSubmit={(e: FormEvent) => {
+                  e.preventDefault();
+                }}
+              >
                 <StyledDivide>
                   <span>OR</span>
                 </StyledDivide>
-                <Input as={StyledInput} label='Work Email' type='email' />
-                <Input as={StyledInput} label='Password' type='password' />
+                <Input as={StyledInput} label="Work Email" type="email" />
+                <Input as={StyledInput} label="Password" type="password" />
                 <Button
                   as={StyledLogin}
-                  name='Submit'
-                  type='submit'
-                  variant='primary'
-                  onClick={() => {handleForm()}}
+                  name="Submit"
+                  type="submit"
+                  variant="primary"
+                  onClick={() => {
+                    handleForm();
+                  }}
                 >
                   Log in
                 </Button>
@@ -199,7 +211,7 @@ const Login: React.FC = () => {
         </Flex>
       </StyledPage>
     </>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

@@ -9,6 +9,7 @@ import {
   Input,
   Option,
   Select,
+  Modal,
 } from "@pega/cosmos-react-core";
 import {
   StyledList,
@@ -166,7 +167,7 @@ const Board = () => {
       <GlobalStyle />
       <StyledPage>
         {movingTask && (
-          <div>
+          <Modal>
             <Select
               value={newStatus}
               onChange={(e) => setNewStatus(e.target.value)}
@@ -178,17 +179,17 @@ const Board = () => {
               ))}
             </Select>
             <Button onClick={handleSaveTask}>Save</Button>
-          </div>
+          </Modal>
         )}
         {editingTask && (
-          <div>
+          <Modal>
             <Input
               type="text"
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
             />
             <Button onClick={handleSaveTask}>Save</Button>
-          </div>
+          </Modal>
         )}
         <Flex as={StyledTask} container={{ direction: "row" }}>
           {statuses.map((status, statusIndex) => (

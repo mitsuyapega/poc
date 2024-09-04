@@ -10,7 +10,10 @@ import {
   Option,
   Select,
   Modal,
+  Icon,
+  registerIcon,
 } from "@pega/cosmos-react-core";
+import AppHeader from "@pega/cosmos-react-core/lib/components/AppShell/AppHeader";
 import {
   StyledList,
   StyledSublistItem,
@@ -18,6 +21,11 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "./store";
 import { updateTask, deleteTask, moveTask } from "./tasksSlice";
+import clickUpLogo from "./assets/clickuplogo-whitetext.svg";
+import NavigationList from "@pega/cosmos-react-core/lib/components/AppShell/NavigationList";
+import * as homeIcon from "@pega/cosmos-react-core/lib/components/Icon/icons/home.icon";
+
+registerIcon(homeIcon);
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -26,7 +34,7 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 const StyledPage = styled.div`
-  padding: 20px;
+  padding: 0;
   width: 90%;
 `;
 
@@ -34,14 +42,14 @@ const StyledTask = styled(StyledList)``;
 
 const StyledTaskList = styled(StyledSublistItem)(() => {
   const {
-    white,
     gray: { "extra-light": extraLight },
   } = defaultThemeProp.theme.base.colors;
 
   return css`
     padding: 10px;
+    margin: 5px;
     border-radius: 10px;
-    background-color: ${white};
+    background-color: ${extraLight};
     box-shadow: 0 2px 10px ${extraLight};
     margin-bottom: 20px;
   `;
@@ -110,6 +118,14 @@ const StatusTag = styled.span`
   font-size: 12px;
 `;
 
+const NavigationContainer = styled.div`
+  width: 34px;
+  background-color: ${defaultThemeProp.theme.base.colors.gray["light"]};
+  display: flex;
+  flex-direction: column;
+  height: 96vh;
+`;
+
 const Board = () => {
   const dispatch = useDispatch();
   const statuses = useSelector((state: RootState) => {
@@ -162,78 +178,110 @@ const Board = () => {
     }
   };
 
+  const NavigationItems = [
+    {
+      primary: "",
+      visual: (
+        <Icon
+          name="home"
+          foreground={defaultThemeProp.theme.base.colors.black}
+          background={defaultThemeProp.theme.base.colors.gray["light"]}
+          size="m"
+        />
+      ),
+      href: "/",
+    },
+  ];
+
   return (
     <>
       <GlobalStyle />
-      <StyledPage>
-        {movingTask && (
-          <Modal>
-            <Select
-              value={newStatus}
-              onChange={(e) => setNewStatus(e.target.value)}
+      <AppHeader
+        appName=""
+        imageSrc={clickUpLogo}
+        operator={{ actions: [] }}
+        searchInput={<Input type="text" placeholder="Search..." />}
+      />
+      <Flex container={{ direction: "row" }}>
+        <NavigationContainer>
+          <NavigationList items={NavigationItems} />
+        </NavigationContainer>
+        <StyledPage>
+          {movingTask && (
+            <Modal
+              heading="Move Task"
+              onRequestDismiss={() => setMovingTask(null)}
             >
-              {statuses.map((status) => (
-                <Option key={status.id} value={status.title}>
+              <Select
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value)}
+              >
+                {statuses.map((status) => (
+                  <Option key={status.id} value={status.title}>
+                    {status.title}
+                  </Option>
+                ))}
+              </Select>
+              <Button onClick={handleSaveTask}>Save</Button>
+            </Modal>
+          )}
+          {editingTask && (
+            <Modal
+              heading="Edit Task"
+              onRequestDismiss={() => setEditingTask(null)}
+            >
+              <Input
+                type="text"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+              />
+              <Button onClick={handleSaveTask}>Save</Button>
+            </Modal>
+          )}
+          <Flex as={StyledTask} container={{ direction: "row" }}>
+            {statuses.map((status, statusIndex) => (
+              <Flex
+                as={StyledTaskList}
+                container={{ direction: "column" }}
+                key={statusIndex}
+              >
+                <StyledTaskName status={status.title}>
                   {status.title}
-                </Option>
-              ))}
-            </Select>
-            <Button onClick={handleSaveTask}>Save</Button>
-          </Modal>
-        )}
-        {editingTask && (
-          <Modal>
-            <Input
-              type="text"
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-            />
-            <Button onClick={handleSaveTask}>Save</Button>
-          </Modal>
-        )}
-        <Flex as={StyledTask} container={{ direction: "row" }}>
-          {statuses.map((status, statusIndex) => (
-            <Flex
-              as={StyledTaskList}
-              container={{ direction: "column" }}
-              key={statusIndex}
-            >
-              <StyledTaskName status={status.title}>
-                {status.title}
-              </StyledTaskName>
-              {status.tasks.map((task, index) => {
-                const actions = [
-                  {
-                    id: "move",
-                    text: "Move",
-                    onClick: () => handleDropdownSelect("move", task),
-                  },
-                  {
-                    id: "update",
-                    text: "Update",
-                    onClick: () => handleDropdownSelect("update", task),
-                  },
-                  {
-                    id: "delete",
-                    text: "Delete",
-                    onClick: () => handleDropdownSelect("delete", task),
-                  },
-                ];
-                return (
-                  <Card as={StyledCard} key={`${statusIndex}-${index}`}>
-                    <TaskTitle>{task.title}</TaskTitle>
-                    <TaskDetails>
-                      <span>{task.assignedTo}</span>
-                      <StatusTag>{task.status}</StatusTag>
-                      <Actions items={actions} />
-                    </TaskDetails>
-                  </Card>
-                );
-              })}
-            </Flex>
-          ))}
-        </Flex>
-      </StyledPage>
+                </StyledTaskName>
+                {status.tasks.map((task, index) => {
+                  const actions = [
+                    {
+                      id: "move",
+                      text: "Move",
+                      onClick: () => handleDropdownSelect("move", task),
+                    },
+                    {
+                      id: "update",
+                      text: "Update",
+                      onClick: () => handleDropdownSelect("update", task),
+                    },
+                    {
+                      id: "delete",
+                      text: "Delete",
+                      onClick: () => handleDropdownSelect("delete", task),
+                    },
+                  ];
+                  return (
+                    <Card as={StyledCard} key={`${statusIndex}-${index}`}>
+                      <TaskTitle>{task.title}</TaskTitle>
+                      <TaskDetails>
+                        <span>{task.assignedTo}</span>
+                        <StatusTag>{task.status}</StatusTag>
+                        <Actions items={actions} />
+                      </TaskDetails>
+                    </Card>
+                  );
+                })}
+              </Flex>
+            ))}
+          </Flex>
+        </StyledPage>
+      </Flex>
     </>
   );
 };

@@ -10,7 +10,7 @@ import {
 } from "@pega/cosmos-react-core";
 import { useNavigate } from "react-router-dom";
 import styled, { createGlobalStyle, css } from "styled-components";
-import clickUpLogo from "./assets/clickup logo.svg";
+import clickUpLogo from "./assets/clickuplogo.svg";
 
 const GlobalStyle = createGlobalStyle`
   body {

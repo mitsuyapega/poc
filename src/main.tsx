@@ -5,6 +5,7 @@ import { Provider } from "react-redux";
 import store from "./store";
 import Login from "./Login";
 import Board from "./Board";
+import { ModalManager } from "@pega/cosmos-react-core";
 
 function AppRoutes() {
   const element = useRoutes([
@@ -22,11 +23,13 @@ function AppRoutes() {
 }
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <Provider store={store}>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
-    </Provider>
-  </React.StrictMode>,
+    <React.StrictMode>
+      <Provider store={store}>
+        <BrowserRouter>
+          <ModalManager>
+            <AppRoutes />
+          </ModalManager>
+        </BrowserRouter>
+      </Provider>
+    </React.StrictMode>,
 );

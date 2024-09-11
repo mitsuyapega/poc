@@ -10,8 +10,11 @@ import {
   Option,
   Select,
   Modal,
-  Icon,
   registerIcon,
+  AppShell,
+  AppShellProps,
+  useModalManager,
+  useModalContext,
 } from "@pega/cosmos-react-core";
 import AppHeader from "@pega/cosmos-react-core/lib/components/AppShell/AppHeader";
 import {
@@ -22,7 +25,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "./store";
 import { updateTask, deleteTask, moveTask } from "./tasksSlice";
 import clickUpLogo from "./assets/clickuplogo-whitetext.svg";
-import NavigationList from "@pega/cosmos-react-core/lib/components/AppShell/NavigationList";
 import * as homeIcon from "@pega/cosmos-react-core/lib/components/Icon/icons/home.icon";
 
 registerIcon(homeIcon);
@@ -30,12 +32,13 @@ registerIcon(homeIcon);
 const GlobalStyle = createGlobalStyle`
   body {
     font-family: ${defaultThemeProp.theme.base["font-family"]};
+    margin: 0;
   }
 `;
 
 const StyledPage = styled.div`
   padding: 0;
-  width: 90%;
+  width: 97%;
 `;
 
 const StyledTask = styled(StyledList)``;
@@ -52,6 +55,11 @@ const StyledTaskList = styled(StyledSublistItem)(() => {
     background-color: ${extraLight};
     box-shadow: 0 2px 10px ${extraLight};
     margin-bottom: 20px;
+    width: 500px;
+    box-sizing: border-box;
+    height: 92vh;
+    overflow-x: hidden;
+    overflow-y: auto;
   `;
 });
 
@@ -109,6 +117,7 @@ const StyledTaskName = styled.span((props) => {
   return css`
     background-color: ${backgroundColor};
     color: ${fontColor};
+    box-sizing: border-box;
   `;
 });
 
@@ -118,23 +127,14 @@ const StatusTag = styled.span`
   font-size: 12px;
 `;
 
-const NavigationContainer = styled.div`
-  width: 34px;
-  background-color: ${defaultThemeProp.theme.base.colors.gray["light"]};
-  display: flex;
-  flex-direction: column;
-  height: 96vh;
-`;
-
 const Board = () => {
   const dispatch = useDispatch();
-  const statuses = useSelector((state: RootState) => {
-    return state.tasks.statuses;
-  });
+  const statuses = useSelector((state: RootState) => state.tasks.statuses);
   const [movingTask, setMovingTask] = useState(null);
   const [editingTask, setEditingTask] = useState(null);
   const [newStatus, setNewStatus] = useState("");
   const [newTitle, setNewTitle] = useState("");
+  const { dismiss } = useModalContext();
 
   const handleMoveTask = (task) => {
     setMovingTask(task);
@@ -155,17 +155,68 @@ const Board = () => {
       dispatch(moveTask({ id: movingTask.id, newStatus }));
       setMovingTask(null);
       setNewStatus("");
-    }
-    if (editingTask) {
+    } else if (editingTask) {
       const updatedTask = { ...editingTask, title: newTitle };
       dispatch(updateTask(updatedTask));
       setEditingTask(null);
       setNewTitle("");
     }
+    dismiss();
   };
 
   const handleDeleteTask = (taskId) => {
     dispatch(deleteTask(taskId));
+  };
+
+  const { create } = useModalManager();
+
+  const editUpdateModal = () => {
+    const actions = (
+        <>
+          <Button onClick={dismiss}>Close</Button>
+          <Button
+              onClick={() => {
+                handleSaveTask();
+              }}
+          >
+            Save
+          </Button>
+        </>
+    );
+    if (movingTask) {
+      return (
+          <Modal
+              actions={actions}
+              heading="Move Task"
+              onRequestDismiss={() => setMovingTask(null)}
+          >
+            <Select
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value)}
+            >
+              {statuses.map((status) => (
+                  <Option key={status.id} value={status.title}>
+                    {status.title}
+                  </Option>
+              ))}
+            </Select>
+          </Modal>
+      );
+    } else if (editingTask) {
+      return (
+          <Modal
+              actions={actions}
+              heading="Edit Task"
+              onRequestDismiss={() => setEditingTask(null)}
+          >
+            <Input
+                type="text"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+            />
+          </Modal>
+      );
+    }
   };
 
   const handleDropdownSelect = (action, task) => {
@@ -176,113 +227,89 @@ const Board = () => {
     } else if (action === "delete") {
       handleDeleteTask(task.id);
     }
+    create(editUpdateModal);
   };
 
-  const NavigationItems = [
+  const MainLinks: AppShellProps["links"] = [
     {
-      primary: "",
-      visual: (
-        <Icon
-          name="home"
-          foreground={defaultThemeProp.theme.base.colors.black}
-          background={defaultThemeProp.theme.base.colors.gray["light"]}
-          size="m"
-        />
-      ),
+      id: "01",
+      name: "",
       href: "/",
+      icon: "home",
+      active: true,
     },
   ];
 
-  return (
-    <>
-      <GlobalStyle />
-      <AppHeader
-        appName=""
-        imageSrc={clickUpLogo}
-        operator={{ actions: [] }}
-        searchInput={<Input type="text" placeholder="Search..." />}
-      />
+  const MainContent = (
       <Flex container={{ direction: "row" }}>
-        <NavigationContainer>
-          <NavigationList items={NavigationItems} />
-        </NavigationContainer>
         <StyledPage>
-          {movingTask && (
-            <Modal
-              heading="Move Task"
-              onRequestDismiss={() => setMovingTask(null)}
-            >
-              <Select
-                value={newStatus}
-                onChange={(e) => setNewStatus(e.target.value)}
-              >
-                {statuses.map((status) => (
-                  <Option key={status.id} value={status.title}>
-                    {status.title}
-                  </Option>
-                ))}
-              </Select>
-              <Button onClick={handleSaveTask}>Save</Button>
-            </Modal>
-          )}
-          {editingTask && (
-            <Modal
-              heading="Edit Task"
-              onRequestDismiss={() => setEditingTask(null)}
-            >
-              <Input
-                type="text"
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-              />
-              <Button onClick={handleSaveTask}>Save</Button>
-            </Modal>
-          )}
           <Flex as={StyledTask} container={{ direction: "row" }}>
             {statuses.map((status, statusIndex) => (
-              <Flex
-                as={StyledTaskList}
-                container={{ direction: "column" }}
-                key={statusIndex}
-              >
-                <StyledTaskName status={status.title}>
-                  {status.title}
-                </StyledTaskName>
-                {status.tasks.map((task, index) => {
-                  const actions = [
-                    {
-                      id: "move",
-                      text: "Move",
-                      onClick: () => handleDropdownSelect("move", task),
-                    },
-                    {
-                      id: "update",
-                      text: "Update",
-                      onClick: () => handleDropdownSelect("update", task),
-                    },
-                    {
-                      id: "delete",
-                      text: "Delete",
-                      onClick: () => handleDropdownSelect("delete", task),
-                    },
-                  ];
-                  return (
-                    <Card as={StyledCard} key={`${statusIndex}-${index}`}>
-                      <TaskTitle>{task.title}</TaskTitle>
-                      <TaskDetails>
-                        <span>{task.assignedTo}</span>
-                        <StatusTag>{task.status}</StatusTag>
-                        <Actions items={actions} />
-                      </TaskDetails>
-                    </Card>
-                  );
-                })}
-              </Flex>
+                <Flex
+                    as={StyledTaskList}
+                    container={{ direction: "column" }}
+                    key={statusIndex}
+                >
+                  <StyledTaskName status={status.title}>
+                    {status.title}
+                  </StyledTaskName>
+                  {status.tasks.map((task, index) => {
+                    const actions = [
+                      {
+                        id: "move",
+                        text: "Move",
+                        onClick: () => handleDropdownSelect("move", task),
+                      },
+                      {
+                        id: "update",
+                        text: "Update",
+                        onClick: () => handleDropdownSelect("update", task),
+                      },
+                      {
+                        id: "delete",
+                        text: "Delete",
+                        onClick: () => handleDropdownSelect("delete", task),
+                      },
+                    ];
+                    return (
+                        <Card as={StyledCard} key={`${statusIndex}-${index}`}>
+                          <TaskTitle>{task.title}</TaskTitle>
+                          <TaskDetails>
+                            <span>{task.assignedTo}</span>
+                            <StatusTag>{task.status}</StatusTag>
+                            <Actions items={actions} />
+                          </TaskDetails>
+                        </Card>
+                    );
+                  })}
+                </Flex>
             ))}
           </Flex>
         </StyledPage>
       </Flex>
-    </>
+  );
+
+  const MainHeader = (
+      <AppHeader
+          appName=""
+          imageSrc={clickUpLogo}
+          operator={{ actions: [] }}
+          searchInput={<Input type="text" placeholder="Search..." />}
+      />
+  );
+
+  return (
+      <>
+        <GlobalStyle />
+        <AppShell
+            appInfo={{ appName: "", imageSrc: clickUpLogo }}
+            main={MainContent}
+            operator={{ actions: [] }}
+            searchInput={<Input type="text" placeholder="Search..." />}
+            appHeader={MainHeader}
+            links={MainLinks}
+        />
+      </>
   );
 };
 

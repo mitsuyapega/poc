@@ -153,7 +153,6 @@ const Board = () => {
   };
 
   const handleSaveTask = useCallback(() => {
-    // const { dismiss } = useModalContext();
     if (movingTask) {
       dispatch(moveTask({ id: movingTask.id, newStatus }));
       setMovingTask(null);
@@ -166,7 +165,6 @@ const Board = () => {
       setNewTitle("");
     }
     console.log("dismiss start handle");
-    // dismiss();
     console.log("dismiss end handle");
   }, [movingTask, editingTask, newStatus, newTitle, dispatch]);
 
@@ -239,7 +237,7 @@ const Board = () => {
               }}
           >
             <Select
-                value={newStatus}
+                defaultValue={newStatus}
                 onChange={(e) => {
                   console.log("Updating newStatus:", e.target.value);
                   setNewStatus(e.target.value);
@@ -279,7 +277,7 @@ const Board = () => {
           >
             <Input
                 type="text"
-                value={newTitle}
+                defaultValue={newTitle}
                 onChange={(e) => {
                   console.log("Updating newTitle:", e.target.value);
                   setNewTitle(e.target.value);
@@ -304,8 +302,8 @@ const Board = () => {
     console.log("useEffect");
     if (
         (movingTask || editingTask)
-         &&
-        !document.querySelector('[aria-modal="true"]')
+         // &&
+        // !document.querySelector('[aria-modal="true"]')
         // !modalCreatedRef.current
     ) {
       console.log("useEffect if");

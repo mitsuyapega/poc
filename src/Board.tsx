@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import styled, { createGlobalStyle, css } from "styled-components";
 import {
   Actions,
@@ -134,7 +134,9 @@ const Board = () => {
   const [editingTask, setEditingTask] = useState(null);
   const [newStatus, setNewStatus] = useState("");
   const [newTitle, setNewTitle] = useState("");
-  const { dismiss } = useModalContext();
+  const { create } = useModalManager();
+
+  const modalCreatedRef = useRef(false);
 
   const handleMoveTask = (task) => {
     setMovingTask(task);
@@ -150,33 +152,67 @@ const Board = () => {
     setNewTitle(task.title);
   };
 
-  const handleSaveTask = () => {
+  const handleSaveTask = useCallback(() => {
+    // const { dismiss } = useModalContext();
     if (movingTask) {
       dispatch(moveTask({ id: movingTask.id, newStatus }));
       setMovingTask(null);
       setNewStatus("");
-    } else if (editingTask) {
+    }
+    if (editingTask) {
       const updatedTask = { ...editingTask, title: newTitle };
       dispatch(updateTask(updatedTask));
       setEditingTask(null);
       setNewTitle("");
     }
-    dismiss();
-  };
+    console.log("dismiss start handle");
+    // dismiss();
+    console.log("dismiss end handle");
+  }, [movingTask, editingTask, newStatus, newTitle, dispatch]);
 
   const handleDeleteTask = (taskId) => {
     dispatch(deleteTask(taskId));
   };
 
-  const { create } = useModalManager();
+  const editUpdateModal = useCallback(() => {
+    console.log("editUpdateModal");
+    const { dismiss } = useModalContext();
 
-  const editUpdateModal = () => {
+    // useEffect(() => {
+    //   if (movingTask) {
+    //     console.log("Setting initial value for newStatus:", movingTask.status);
+    //     setNewStatus(movingTask.status);
+    //   }
+    // }, [movingTask]);
+    //
+    // useEffect(() => {
+    //   if (editingTask) {
+    //     console.log("Setting initial value for newTitle:", editingTask.title);
+    //     setNewTitle(editingTask.title);
+    //   }
+    // }, [editingTask]);
+
     const actions = (
         <>
-          <Button onClick={dismiss}>Close</Button>
+          <Button
+              onClick={() => {
+                setEditingTask(null);
+                setMovingTask(null);
+                console.log("dismiss start close");
+                dismiss();
+                console.log("dismiss end close");
+              }}
+          >
+            Close
+          </Button>
           <Button
               onClick={() => {
                 handleSaveTask();
+                setEditingTask(null);
+                setMovingTask(null);
+                console.log("dismiss start save");
+                dismiss();
+                console.log("dismiss end save");
               }}
           >
             Save
@@ -188,11 +224,27 @@ const Board = () => {
           <Modal
               actions={actions}
               heading="Move Task"
-              onRequestDismiss={() => setMovingTask(null)}
+              dismissible={true}
+              onAfterOpen={() => {
+                if (movingTask) {
+                  setNewStatus(movingTask.status);
+                }
+              }}
+              onRequestDismiss={() => {
+                setMovingTask(null);
+                console.log("onRequestDismiss start edit");
+                dismiss();
+                console.log("onRequestDismiss end edit");
+                return true;
+              }}
           >
             <Select
                 value={newStatus}
-                onChange={(e) => setNewStatus(e.target.value)}
+                onChange={(e) => {
+                  console.log("Updating newStatus:", e.target.value);
+                  setNewStatus(e.target.value);
+                  // dismiss();
+                }}
             >
               {statuses.map((status) => (
                   <Option key={status.id} value={status.title}>
@@ -207,27 +259,72 @@ const Board = () => {
           <Modal
               actions={actions}
               heading="Edit Task"
-              onRequestDismiss={() => setEditingTask(null)}
+              dismissible={true}
+              // onAfterOpen={() => {
+              //   if (editingTask) {
+              //     console.log(
+              //         "Setting initial value for newTitle:",
+              //         editingTask.title,
+              //     );
+              //     setNewTitle(editingTask.title);
+              //   }
+              // }}
+              onRequestDismiss={() => {
+                setEditingTask(null);
+                console.log("onRequestDismiss start edit");
+                dismiss();
+                console.log("onRequestDismiss end edit");
+                return true;
+              }}
           >
             <Input
                 type="text"
                 value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
+                onChange={(e) => {
+                  console.log("Updating newTitle:", e.target.value);
+                  setNewTitle(e.target.value);
+                  // dismiss();
+                }}
             />
           </Modal>
       );
     }
-  };
+
+    return null;
+  }, [handleSaveTask, movingTask, editingTask, newStatus, newTitle, statuses]);
+
+  // useEffect(() => {
+  //   if (editingTask && !modalCreatedRef.current) {
+  //     console.log("Setting initial value for newTitle:", editingTask.title);
+  //     setNewTitle(editingTask.title);
+  //   }
+  // }, [editingTask]);
+
+  useEffect(() => {
+    console.log("useEffect");
+    if (
+        (movingTask || editingTask)
+         &&
+        !document.querySelector('[aria-modal="true"]')
+        // !modalCreatedRef.current
+    ) {
+      console.log("useEffect if");
+      create(editUpdateModal, { dismissible: true });
+      // modalCreatedRef.current = true;
+    }
+  }, [movingTask, editingTask]);
 
   const handleDropdownSelect = (action, task) => {
+    console.log("handleDropdownSelect");
     if (action === "move") {
+      console.log("handleDropdownSelect move");
       handleMoveTask(task);
     } else if (action === "update") {
+      console.log("handleDropdownSelect update");
       handleUpdateTask(task);
     } else if (action === "delete") {
       handleDeleteTask(task.id);
     }
-    create(editUpdateModal);
   };
 
   const MainLinks: AppShellProps["links"] = [

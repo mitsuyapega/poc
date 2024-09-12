@@ -155,7 +155,7 @@ const Board = () => {
   const newTitleRef = useRef(newTitle);
 
   useEffect(() => {
-    newTitleRef.current = newTitle
+    newTitleRef.current = newTitle;
   }, [newTitle]);
 
   const handleSaveTask = useCallback(() => {
@@ -197,100 +197,100 @@ const Board = () => {
     // }, [editingTask]);
 
     const actions = (
-        <>
-          <Button
-              onClick={() => {
-                setEditingTask(null);
-                setMovingTask(null);
-                console.log("dismiss start close");
-                dismiss();
-                console.log("dismiss end close");
-              }}
-          >
-            Close
-          </Button>
-          <Button
-              onClick={() => {
-                handleSaveTask();
-                setEditingTask(null);
-                setMovingTask(null);
-                console.log("dismiss start save");
-                dismiss();
-                console.log("dismiss end save");
-              }}
-          >
-            Save
-          </Button>
-        </>
+      <>
+        <Button
+          onClick={() => {
+            setEditingTask(null);
+            setMovingTask(null);
+            console.log("dismiss start close");
+            dismiss();
+            console.log("dismiss end close");
+          }}
+        >
+          Close
+        </Button>
+        <Button
+          onClick={() => {
+            handleSaveTask();
+            setEditingTask(null);
+            setMovingTask(null);
+            console.log("dismiss start save");
+            dismiss();
+            console.log("dismiss end save");
+          }}
+        >
+          Save
+        </Button>
+      </>
     );
     if (movingTask) {
       return (
-          <Modal
-              actions={actions}
-              heading="Move Task"
-              dismissible={true}
-              onAfterOpen={() => {
-                if (movingTask) {
-                  setNewStatus(movingTask.status);
-                }
-              }}
-              onRequestDismiss={() => {
-                setMovingTask(null);
-                console.log("onRequestDismiss start edit");
-                dismiss();
-                console.log("onRequestDismiss end edit");
-                return true;
-              }}
+        <Modal
+          actions={actions}
+          heading="Move Task"
+          dismissible={true}
+          onAfterOpen={() => {
+            if (movingTask) {
+              setNewStatus(movingTask.status);
+            }
+          }}
+          onRequestDismiss={() => {
+            setMovingTask(null);
+            console.log("onRequestDismiss start edit");
+            dismiss();
+            console.log("onRequestDismiss end edit");
+            return true;
+          }}
+        >
+          <Select
+            defaultValue={newStatus}
+            onChange={(e) => {
+              console.log("Updating newStatus:", e.target.value);
+              setNewStatus(e.target.value);
+              // dismiss();
+            }}
           >
-            <Select
-                defaultValue={newStatus}
-                onChange={(e) => {
-                  console.log("Updating newStatus:", e.target.value);
-                  setNewStatus(e.target.value);
-                  // dismiss();
-                }}
-            >
-              {statuses.map((status) => (
-                  <Option key={status.id} value={status.title}>
-                    {status.title}
-                  </Option>
-              ))}
-            </Select>
-          </Modal>
+            {statuses.map((status) => (
+              <Option key={status.id} value={status.title}>
+                {status.title}
+              </Option>
+            ))}
+          </Select>
+        </Modal>
       );
     } else if (editingTask) {
       return (
-          <Modal
-              actions={actions}
-              heading="Edit Task"
-              dismissible={true}
-              // onAfterOpen={() => {
-              //   if (editingTask) {
-              //     console.log(
-              //         "Setting initial value for newTitle:",
-              //         editingTask.title,
-              //     );
-              //     setNewTitle(editingTask.title);
-              //   }
-              // }}
-              onRequestDismiss={() => {
-                setEditingTask(null);
-                console.log("onRequestDismiss start edit");
-                dismiss();
-                console.log("onRequestDismiss end edit");
-                return true;
-              }}
-          >
-            <Input
-                type="text"
-                defaultValue={newTitle}
-                onChange={(e) => {
-                  console.log("Updating newTitle:", e.target.value);
-                  setNewTitle(e.target.value);
-                  // dismiss();
-                }}
-            />
-          </Modal>
+        <Modal
+          actions={actions}
+          heading="Edit Task"
+          dismissible={true}
+          // onAfterOpen={() => {
+          //   if (editingTask) {
+          //     console.log(
+          //         "Setting initial value for newTitle:",
+          //         editingTask.title,
+          //     );
+          //     setNewTitle(editingTask.title);
+          //   }
+          // }}
+          onRequestDismiss={() => {
+            setEditingTask(null);
+            console.log("onRequestDismiss start edit");
+            dismiss();
+            console.log("onRequestDismiss end edit");
+            return true;
+          }}
+        >
+          <Input
+            type="text"
+            defaultValue={newTitle}
+            onChange={(e) => {
+              console.log("Updating newTitle:", e.target.value);
+              setNewTitle(e.target.value);
+              // dismiss();
+            }}
+          />
+        </Modal>
       );
     }
 
@@ -307,10 +307,11 @@ const Board = () => {
   useEffect(() => {
     console.log("useEffect");
     if (
-        (movingTask || editingTask)
-         // &&
-        // !document.querySelector('[aria-modal="true"]')
-        // !modalCreatedRef.current
+      movingTask ||
+      editingTask
+      // &&
+      // !document.querySelector('[aria-modal="true"]')
+      // !modalCreatedRef.current
     ) {
       console.log("useEffect if");
       create(editUpdateModal, { dismissible: true });
@@ -342,75 +343,75 @@ const Board = () => {
   ];
 
   const MainContent = (
-      <Flex container={{ direction: "row" }}>
-        <StyledPage>
-          <Flex as={StyledTask} container={{ direction: "row" }}>
-            {statuses.map((status, statusIndex) => (
-                <Flex
-                    as={StyledTaskList}
-                    container={{ direction: "column" }}
-                    key={statusIndex}
-                >
-                  <StyledTaskName status={status.title}>
-                    {status.title}
-                  </StyledTaskName>
-                  {status.tasks.map((task, index) => {
-                    const actions = [
-                      {
-                        id: "move",
-                        text: "Move",
-                        onClick: () => handleDropdownSelect("move", task),
-                      },
-                      {
-                        id: "update",
-                        text: "Update",
-                        onClick: () => handleDropdownSelect("update", task),
-                      },
-                      {
-                        id: "delete",
-                        text: "Delete",
-                        onClick: () => handleDropdownSelect("delete", task),
-                      },
-                    ];
-                    return (
-                        <Card as={StyledCard} key={`${statusIndex}-${index}`}>
-                          <TaskTitle>{task.title}</TaskTitle>
-                          <TaskDetails>
-                            <span>{task.assignedTo}</span>
-                            <StatusTag>{task.status}</StatusTag>
-                            <Actions items={actions} />
-                          </TaskDetails>
-                        </Card>
-                    );
-                  })}
-                </Flex>
-            ))}
-          </Flex>
-        </StyledPage>
-      </Flex>
+    <Flex container={{ direction: "row" }}>
+      <StyledPage>
+        <Flex as={StyledTask} container={{ direction: "row" }}>
+          {statuses.map((status, statusIndex) => (
+            <Flex
+              as={StyledTaskList}
+              container={{ direction: "column" }}
+              key={statusIndex}
+            >
+              <StyledTaskName status={status.title}>
+                {status.title}
+              </StyledTaskName>
+              {status.tasks.map((task, index) => {
+                const actions = [
+                  {
+                    id: "move",
+                    text: "Move",
+                    onClick: () => handleDropdownSelect("move", task),
+                  },
+                  {
+                    id: "update",
+                    text: "Update",
+                    onClick: () => handleDropdownSelect("update", task),
+                  },
+                  {
+                    id: "delete",
+                    text: "Delete",
+                    onClick: () => handleDropdownSelect("delete", task),
+                  },
+                ];
+                return (
+                  <Card as={StyledCard} key={`${statusIndex}-${index}`}>
+                    <TaskTitle>{task.title}</TaskTitle>
+                    <TaskDetails>
+                      <span>{task.assignedTo}</span>
+                      <StatusTag>{task.status}</StatusTag>
+                      <Actions items={actions} />
+                    </TaskDetails>
+                  </Card>
+                );
+              })}
+            </Flex>
+          ))}
+        </Flex>
+      </StyledPage>
+    </Flex>
   );
 
   const MainHeader = (
-      <AppHeader
-          appName=""
-          imageSrc={clickUpLogo}
-          operator={{ actions: [] }}
-          searchInput={<Input type="text" placeholder="Search..." />}
-      />
+    <AppHeader
+      appName=""
+      imageSrc={clickUpLogo}
+      operator={{ actions: [] }}
+      searchInput={<Input type="text" placeholder="Search..." />}
+    />
   );
 
   return (
-      <>
-        <GlobalStyle />
-        <AppShell
-            appInfo={{ appName: "", imageSrc: clickUpLogo }}
-            main={MainContent}
-            operator={{ actions: [] }}
-            searchInput={<Input type="text" placeholder="Search..." />}
-            appHeader={MainHeader}
-            links={MainLinks}
-        />
-      </>
+    <>
+      <GlobalStyle />
+      <AppShell
+        appInfo={{ appName: "", imageSrc: clickUpLogo }}
+        main={MainContent}
+        operator={{ actions: [] }}
+        searchInput={<Input type="text" placeholder="Search..." />}
+        appHeader={MainHeader}
+        links={MainLinks}
+      />
+    </>
   );
 };
 

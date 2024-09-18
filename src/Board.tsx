@@ -152,6 +152,12 @@ const Board = () => {
     setNewTitle(task.title);
   };
 
+  const newStatusRef = useRef(newStatus);
+
+  useEffect(() => {
+    newStatusRef.current = newStatus;
+  }, [newStatus]);
+
   const newTitleRef = useRef(newTitle);
 
   useEffect(() => {
@@ -160,7 +166,9 @@ const Board = () => {
 
   const handleSaveTask = useCallback(() => {
     if (movingTask) {
-      dispatch(moveTask({ id: movingTask.id, newStatus }));
+      dispatch(
+        moveTask({ id: movingTask.id, newStatus: newStatusRef.current }),
+      );
       setMovingTask(null);
       setNewStatus("");
     }

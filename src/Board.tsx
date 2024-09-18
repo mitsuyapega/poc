@@ -135,8 +135,8 @@ const Board = () => {
   const [newStatus, setNewStatus] = useState("");
   const [newTitle, setNewTitle] = useState("");
   const { create } = useModalManager();
-
-  const modalCreatedRef = useRef(false);
+  const selectRef = useRef(null);
+  const inputRef = useRef(null);
 
   const handleMoveTask = (task) => {
     setMovingTask(task);
@@ -152,36 +152,6 @@ const Board = () => {
     setNewTitle(task.title);
   };
 
-  const newStatusRef = useRef(newStatus);
-
-  useEffect(() => {
-    newStatusRef.current = newStatus;
-  }, [newStatus]);
-
-  const newTitleRef = useRef(newTitle);
-
-  useEffect(() => {
-    newTitleRef.current = newTitle;
-  }, [newTitle]);
-
-  const handleSaveTask = useCallback(() => {
-    if (movingTask) {
-      dispatch(
-        moveTask({ id: movingTask.id, newStatus: newStatusRef.current }),
-      );
-      setMovingTask(null);
-      setNewStatus("");
-    }
-    if (editingTask) {
-      const updatedTask = { ...editingTask, title: newTitleRef.current };
-      dispatch(updateTask(updatedTask));
-      setEditingTask(null);
-      setNewTitle("");
-    }
-    console.log("dismiss start handle");
-    console.log("dismiss end handle");
-  }, [movingTask, editingTask, newStatus, newTitle, dispatch]);
-
   const handleDeleteTask = (taskId) => {
     dispatch(deleteTask(taskId));
   };
@@ -190,19 +160,23 @@ const Board = () => {
     console.log("editUpdateModal");
     const { dismiss } = useModalContext();
 
-    // useEffect(() => {
-    //   if (movingTask) {
-    //     console.log("Setting initial value for newStatus:", movingTask.status);
-    //     setNewStatus(movingTask.status);
-    //   }
-    // }, [movingTask]);
-    //
-    // useEffect(() => {
-    //   if (editingTask) {
-    //     console.log("Setting initial value for newTitle:", editingTask.title);
-    //     setNewTitle(editingTask.title);
-    //   }
-    // }, [editingTask]);
+    const handleSaveTask = () => {
+      if (movingTask) {
+        dispatch(
+          moveTask({ id: movingTask.id, newStatus: selectRef.current.value }),
+        );
+        setMovingTask(null);
+        setNewStatus("");
+      }
+      if (editingTask) {
+        const updatedTask = { ...editingTask, title: inputRef.current.value };
+        dispatch(updateTask(updatedTask));
+        setEditingTask(null);
+        setNewTitle("");
+      }
+      console.log("dismiss start handle");
+      console.log("dismiss end handle");
+    };
 
     const actions = (
       <>
@@ -250,14 +224,7 @@ const Board = () => {
             return true;
           }}
         >
-          <Select
-            defaultValue={newStatus}
-            onChange={(e) => {
-              console.log("Updating newStatus:", e.target.value);
-              setNewStatus(e.target.value);
-              // dismiss();
-            }}
-          >
+          <Select defaultValue={newStatus} ref={selectRef}>
             {statuses.map((status) => (
               <Option key={status.id} value={status.title}>
                 {status.title}
@@ -272,15 +239,6 @@ const Board = () => {
           actions={actions}
           heading="Edit Task"
           dismissible={true}
-          // onAfterOpen={() => {
-          //   if (editingTask) {
-          //     console.log(
-          //         "Setting initial value for newTitle:",
-          //         editingTask.title,
-          //     );
-          //     setNewTitle(editingTask.title);
-          //   }
-          // }}
           onRequestDismiss={() => {
             setEditingTask(null);
             console.log("onRequestDismiss start edit");
@@ -289,41 +247,19 @@ const Board = () => {
             return true;
           }}
         >
-          <Input
-            type="text"
-            defaultValue={newTitle}
-            onChange={(e) => {
-              console.log("Updating newTitle:", e.target.value);
-              setNewTitle(e.target.value);
-              // dismiss();
-            }}
-          />
+          <Input type="text" defaultValue={newTitle} ref={inputRef} />
         </Modal>
       );
     }
 
     return null;
-  }, [handleSaveTask, movingTask, editingTask, newStatus, newTitle, statuses]);
-
-  // useEffect(() => {
-  //   if (editingTask && !modalCreatedRef.current) {
-  //     console.log("Setting initial value for newTitle:", editingTask.title);
-  //     setNewTitle(editingTask.title);
-  //   }
-  // }, [editingTask]);
+  }, [movingTask, editingTask, newStatus, newTitle, statuses]);
 
   useEffect(() => {
     console.log("useEffect");
-    if (
-      movingTask ||
-      editingTask
-      // &&
-      // !document.querySelector('[aria-modal="true"]')
-      // !modalCreatedRef.current
-    ) {
+    if (movingTask || editingTask) {
       console.log("useEffect if");
       create(editUpdateModal, { dismissible: true });
-      // modalCreatedRef.current = true;
     }
   }, [movingTask, editingTask]);
 
